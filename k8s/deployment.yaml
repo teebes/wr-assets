@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wr-assets-deployment
+  labels:
+    app: wr-assets
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: wr-assets
+  template:
+    metadata:
+      labels:
+        app: wr-assets
+    spec:
+      serviceAccountName: forge-prod-service-account
+      imagePullSecrets:
+      - name: dockerhub
+      containers:
+      - name: wr-assets
+        image: teebes/wrassets:latest
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
